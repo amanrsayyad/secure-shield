@@ -1,26 +1,74 @@
 @import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --white-smoke: rgb(228, 227, 212);
+  --gray-color: #e4e3d4;
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: font1;
+  src: url("../assets/fonts/font1.woff2");
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: font2-500;
+  src: url("../assets/fonts/font2-500.woff2");
 }
-
+@font-face {
+  font-family: font2-300;
+  src: url("../assets/fonts/font2-300.woff2");
+}
+@font-face {
+  font-family: font2-400;
+  src: url("../assets/fonts/font2-400.woff2");
+}
+@font-face {
+  font-family: font2-600;
+  src: url("../assets/fonts/font2-600.woff2");
+}
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+.bg {
+  height: 100vw;
+  width: 100%;
+  background-color: rgb(9, 23, 23);
+}
+.hero {
+  height: 1790px;
+}
+.home-bg {
+  position: absolute;
+  top: -2%;
+  z-index: 10;
+}
+.hero-label {
+  position: absolute;
+  top: 85%;
+  left: 0%;
+  z-index: 10000;
+  background-color: #888454;
+  height: 80px;
+  width: 100%;
+}
+.border-btn {
+  border: 1px solid var(--white-smoke);
+  border-radius: 5px;
+  padding: 7px 20px;
+  color: var(--white-smoke);
+  font-size: 13px;
+  font-family: font1;
+}
+.border-font-btn {
+  border: 1px solid var(--white-smoke);
+  border-radius: 5px;
+  padding: 10px 25px;
+  color: var(--white-smoke);
+  font-size: 15px;
+  font-family: font1;
+}
+.border-bg-btn {
+  border-radius: 5px;
+  padding: 10px 25px;
+  background-color: var(--white-smoke);
+  color: #000;
+  font-size: 15px;
+  font-family: font1;
 }
