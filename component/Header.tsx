@@ -8,7 +8,9 @@ export default function Header() {
     <HeaderContainer>
       <h4>Secure Shield</h4>
       <Image src={logo} alt="logo" />
-      <Link href="#" className="border-btn">Get Started</Link>
+      <Link href="/login" className="border-btn">
+        Get Started
+      </Link>
     </HeaderContainer>
   );
 }
