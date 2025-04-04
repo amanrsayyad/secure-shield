@@ -8,7 +8,7 @@ export default function Newsletter() {
         and updates.
       </h5>
       <div className="newsletter-container">
-        <input type="text" placeholder="Email" />
+        <input type="text" placeholder="Email" suppressHydrationWarning />
         <div className="join">Join</div>
       </div>
     </NewsletterMain>

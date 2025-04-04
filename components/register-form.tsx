@@ -72,9 +72,6 @@ export function RegisterForm({
               <a href="/login" className="underline underline-offset-4">
                 Sign in
               </a>
-              <a href="/dashboard" className="underline underline-offset-4">
-                Dashboard
-              </a>
             </div>
           </form>
         </CardContent>
