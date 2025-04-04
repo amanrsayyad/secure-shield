@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export function NavProjects({
-  projects,
+  // projects,
 }: {
   projects: {
     name: string
@@ -34,7 +34,7 @@ export function NavProjects({
     icon: LucideIcon
   }[]
 }) {
-  const { isMobile } = useSidebar()
+  // const { isMobile } = useSidebar()
 
   return (
     <></>
