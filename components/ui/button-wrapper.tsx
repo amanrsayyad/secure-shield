@@ -1,9 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-export function ButtonWrapper({ children, ...props }: ButtonProps) {
+export function ButtonWrapper({
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>) {
   return (
     <Button {...props} suppressHydrationWarning>
       {children}
