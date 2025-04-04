@@ -6,7 +6,7 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
+  // Sparkles,
 } from "lucide-react"
 
 import {

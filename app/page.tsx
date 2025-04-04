@@ -4,7 +4,6 @@ import Image from "next/image";
 import Header from "@/component/Header";
 import Hero from "@/component/Hero";
 import homeBg from "../assets/home-bg.png";
-import heroLabel from "../assets/hero-label.png";
 import Stats from "@/component/Stats";
 import Features from "@/component/Features";
 import Footer from "@/component/Footer";

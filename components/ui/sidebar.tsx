@@ -7,7 +7,7 @@ import { PanelLeftIcon } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -701,22 +701,22 @@ function SidebarMenuSubButton({
   );
 }
 
-function CollapsibleTrigger({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<typeof SidebarButtonWrapper>) {
-  return (
-    <SidebarButtonWrapper
-      data-slot="collapsible-trigger"
-      className={cn("flex w-full items-center gap-2", className)}
-      suppressHydrationWarning
-      {...props}
-    >
-      {children}
-    </SidebarButtonWrapper>
-  );
-}
+// function CollapsibleTrigger({
+//   className,
+//   children,
+//   ...props
+// }: React.ComponentProps<typeof SidebarButtonWrapper>) {
+//   return (
+//     <SidebarButtonWrapper
+//       data-slot="collapsible-trigger"
+//       className={cn("flex w-full items-center gap-2", className)}
+//       suppressHydrationWarning
+//       {...props}
+//     >
+//       {children}
+//     </SidebarButtonWrapper>
+//   );
+// }
 
 export {
   Sidebar,
