@@ -7,7 +7,7 @@ import homeBg from "../assets/home-bg.png";
 import Stats from "@/component/Stats";
 import Features from "@/component/Features";
 import Footer from "@/component/Footer";
-import Blogs from "@/component/Blog";
+import Blogs from "@/components/Blog";
 import Newsletter from "@/component/Newsletter";
 import FooterCta from "@/component/FooterCta";
 
