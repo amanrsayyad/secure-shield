@@ -24,7 +24,7 @@ export async function GET(request) {
         "utf-8"
       );
       userData = JSON.parse(decodedUserData);
-    } catch (error) {
+    } catch (decodeError) {
       return NextResponse.json(
         { error: "Invalid authentication data" },
         { status: 401 }
@@ -67,8 +67,8 @@ export async function GET(request) {
             },
           });
         }
-      } catch (err) {
-        console.error("Database error:", err);
+      } catch (dbError) {
+        console.error("Database error:", dbError);
         // Fall through to use cookie data if database lookup fails
       }
     }
@@ -87,8 +87,8 @@ export async function GET(request) {
           )}&background=random`,
       },
     });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
+  } catch (serverError) {
+    console.error("Error fetching user data:", serverError);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
