@@ -38,7 +38,7 @@ const data = {
       items: [
         {
           title: "Password Manager",
-          url: "#",
+          url: "/tools/password-manager",
         },
         {
           title: "Ip Analysis",
