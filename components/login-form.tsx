@@ -24,6 +24,7 @@ export function LoginForm({
     email: "",
     password: "",
   });
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const dispatch = useAppDispatch();
   const { isLoading, error, user, isAuthenticated } = useAppSelector(
@@ -31,7 +32,7 @@ export function LoginForm({
   );
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/dashboard";
+  const redirectPath = searchParams?.get("redirect") || "/dashboard";
 
   // If user is already authenticated, redirect
   useEffect(() => {
@@ -43,24 +44,42 @@ export function LoginForm({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+    // Clear error when user starts typing
+    setLoginError(null);
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
 
-    const resultAction = await dispatch(loginUser(formData));
+    try {
+      // Dispatch the login action
+      const resultAction = await dispatch(loginUser(formData));
 
-    if (loginUser.fulfilled.match(resultAction)) {
-      // Set auth cookie - in a real app, this would be an HTTP-only cookie set by the server
-      // This is just for demonstration purposes
-      const userString = JSON.stringify(resultAction.payload.user);
+      if (loginUser.fulfilled.match(resultAction)) {
+        // Set auth cookie - in a real app, this would be an HTTP-only cookie set by the server
+        try {
+          const userString = JSON.stringify(resultAction.payload.user);
+          // Use the browser's btoa for base64 encoding
+          const encodedUserData = btoa(userString);
+          document.cookie = `auth=${encodedUserData}; path=/; max-age=86400`; // 1 day expiry
+          console.log("Auth cookie set successfully");
 
-      // Use the browser's btoa for base64 encoding
-      const encodedUserData = btoa(userString);
-      document.cookie = `auth=${encodedUserData}; path=/; max-age=86400`; // 1 day expiry
-
-      // Redirect to the intended page or dashboard
-      router.push(redirectPath);
+          // Redirect to the intended page or dashboard
+          router.push(redirectPath);
+        } catch (cookieError) {
+          console.error("Error setting auth cookie:", cookieError);
+          setLoginError("Authentication error. Please try again.");
+        }
+      } else if (loginUser.rejected.match(resultAction)) {
+        // Handle the specific error message
+        setLoginError(
+          (resultAction.payload as string) || "Login failed. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoginError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -75,9 +94,9 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
-            {error && (
+            {(error || loginError) && (
               <div className="mb-4 rounded bg-destructive/15 p-3 text-sm text-destructive">
-                {error}
+                {loginError || error}
               </div>
             )}
             <div className="flex flex-col gap-6">

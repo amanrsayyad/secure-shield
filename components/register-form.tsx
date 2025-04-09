@@ -15,6 +15,8 @@ import { useState, FormEvent, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { registerUser } from "@/redux/features/auth/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { Skeleton } from "./ui/skeleton";
 
 export function RegisterForm({
   className,
@@ -136,5 +138,45 @@ export function RegisterForm({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function RegisterFormSkeleton() {
+  return (
+    <div className="flex flex-col space-y-2 w-full md:w-[400px] p-4 md:p-6">
+      <div className="text-center mb-6">
+        <Skeleton className="h-8 w-48 mx-auto mb-2" />
+        <Skeleton className="h-4 w-64 mx-auto" />
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+
+        <Skeleton className="h-10 w-full" />
+
+        <Skeleton className="h-4 w-60 mx-auto" />
+      </div>
+    </div>
+  );
+}
+
+export default function RegisterFormWrapper() {
+  return (
+    <Suspense fallback={<RegisterFormSkeleton />}>
+      <RegisterForm />
+    </Suspense>
   );
 }

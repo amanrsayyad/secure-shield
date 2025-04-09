@@ -22,10 +22,14 @@ let initialAuthenticated = false;
 
 // This code will only run on the client, not during SSR
 if (typeof window !== "undefined") {
-  const authUser = getAuthUser();
-  if (authUser) {
-    initialUser = authUser;
-    initialAuthenticated = true;
+  try {
+    const authUser = getAuthUser();
+    if (authUser) {
+      initialUser = authUser;
+      initialAuthenticated = true;
+    }
+  } catch (error) {
+    console.error("Error checking auth state:", error);
   }
 }
 
@@ -45,6 +49,7 @@ export const registerUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log("Registering user...", { email: userData.email });
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: {
@@ -54,13 +59,19 @@ export const registerUser = createAsyncThunk(
       });
 
       const data = await response.json();
+      console.log("Register response:", {
+        status: response.status,
+        success: data.success,
+      });
 
       if (!response.ok) {
+        console.error("Registration failed:", data.error || "Unknown error");
         return rejectWithValue(data.error || "Registration failed");
       }
 
       return data;
     } catch (error) {
+      console.error("Network error during registration:", error);
       return rejectWithValue("Network error. Please try again.");
     }
   }
@@ -74,6 +85,7 @@ export const loginUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log("Logging in user...", { email: userData.email });
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -83,13 +95,19 @@ export const loginUser = createAsyncThunk(
       });
 
       const data = await response.json();
+      console.log("Login response:", {
+        status: response.status,
+        success: data.success,
+      });
 
       if (!response.ok) {
+        console.error("Login failed:", data.error || "Unknown error");
         return rejectWithValue(data.error || "Login failed");
       }
 
       return data;
     } catch (error) {
+      console.error("Network error during login:", error);
       return rejectWithValue("Network error. Please try again.");
     }
   }
@@ -109,6 +127,7 @@ const authSlice = createSlice({
       if (typeof window !== "undefined") {
         document.cookie =
           "auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        console.log("Auth cookie cleared");
       }
     },
     clearError: (state) => {
@@ -126,13 +145,18 @@ const authSlice = createSlice({
         registerUser.fulfilled,
         (state, action: PayloadAction<{ user: User }>) => {
           state.isLoading = false;
-          state.user = action.payload.user;
-          state.isAuthenticated = true;
+          if (action.payload && action.payload.user) {
+            state.user = action.payload.user;
+            state.isAuthenticated = true;
+          } else {
+            // Handle unexpected response format
+            state.error = "Invalid response format";
+          }
         }
       )
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = (action.payload as string) || "Registration failed";
       })
       // Login cases
       .addCase(loginUser.pending, (state) => {
@@ -143,13 +167,18 @@ const authSlice = createSlice({
         loginUser.fulfilled,
         (state, action: PayloadAction<{ user: User }>) => {
           state.isLoading = false;
-          state.user = action.payload.user;
-          state.isAuthenticated = true;
+          if (action.payload && action.payload.user) {
+            state.user = action.payload.user;
+            state.isAuthenticated = true;
+          } else {
+            // Handle unexpected response format
+            state.error = "Invalid response format";
+          }
         }
       )
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = (action.payload as string) || "Login failed";
       });
   },
 });
