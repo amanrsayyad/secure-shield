@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 
-export function SidebarButtonWrapper({
+function SidebarButtonWrapper({
   children,
   ...props
 }: React.ComponentProps<typeof Button>) {
@@ -13,3 +13,5 @@ export function SidebarButtonWrapper({
     </Button>
   );
 }
+
+export { SidebarButtonWrapper };

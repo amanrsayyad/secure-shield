@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { ButtonWrapper } from "@/components/ui/button-wrapper";
 import {
@@ -9,11 +11,59 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState, FormEvent, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { loginUser } from "@/redux/features/auth/authSlice";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const dispatch = useAppDispatch();
+  const { isLoading, error, user, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
+
+  // If user is already authenticated, redirect
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, user, router, redirectPath]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const resultAction = await dispatch(loginUser(formData));
+
+    if (loginUser.fulfilled.match(resultAction)) {
+      // Set auth cookie - in a real app, this would be an HTTP-only cookie set by the server
+      // This is just for demonstration purposes
+      const userString = JSON.stringify(resultAction.payload.user);
+
+      // Use the browser's btoa for base64 encoding
+      const encodedUserData = btoa(userString);
+      document.cookie = `auth=${encodedUserData}; path=/; max-age=86400`; // 1 day expiry
+
+      // Redirect to the intended page or dashboard
+      router.push(redirectPath);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -24,7 +74,12 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 rounded bg-destructive/15 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -34,6 +89,8 @@ export function LoginForm({
                   placeholder="m@example.com"
                   required
                   suppressHydrationWarning
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
               <div className="grid gap-3">
@@ -51,13 +108,23 @@ export function LoginForm({
                   type="password"
                   required
                   suppressHydrationWarning
+                  value={formData.password}
+                  onChange={handleChange}
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <ButtonWrapper type="submit" className="w-full">
-                  Login
+                <ButtonWrapper
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Logging in..." : "Login"}
                 </ButtonWrapper>
-                <ButtonWrapper variant="outline" className="w-full">
+                <ButtonWrapper
+                  variant="outline"
+                  className="w-full"
+                  type="button"
+                >
                   Login with Google
                 </ButtonWrapper>
               </div>

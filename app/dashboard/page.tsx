@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SectionCards } from "@/components/section-cards";
 import {
@@ -14,8 +18,21 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useAppSelector } from "@/redux/hooks";
+import { isAuthenticated } from "@/utils/auth";
 
 export default function Page() {
+  const router = useRouter();
+  const { isAuthenticated: reduxAuth } = useAppSelector((state) => state.auth);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    // Check both cookie and Redux state
+    if (!isAuthenticated() && !reduxAuth) {
+      router.push("/login?redirect=/dashboard");
+    }
+  }, [router, reduxAuth]);
+
   return (
     <SidebarProvider>
       <AppSidebar />

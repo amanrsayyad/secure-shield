@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,11 +11,53 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState, FormEvent, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { registerUser } from "@/redux/features/auth/authSlice";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const dispatch = useAppDispatch();
+  const { isLoading, error, isAuthenticated, user } = useAppSelector(
+    (state) => state.auth
+  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/login";
+
+  // If user is already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, user, router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const resultAction = await dispatch(registerUser(formData));
+
+    if (registerUser.fulfilled.match(resultAction)) {
+      // After successful registration, redirect to login
+      // In a real app with session management, you might want to set cookies here and redirect to dashboard
+      router.push(redirectPath);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -24,26 +68,37 @@ export function RegisterForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 rounded bg-destructive/15 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Name</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
+                  name="name"
                   type="text"
                   placeholder="John Doe"
                   required
                   suppressHydrationWarning
+                  value={formData.name}
+                  onChange={handleChange}
                 />
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="m@example.com"
                   required
                   suppressHydrationWarning
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
               <div className="grid gap-3">
@@ -52,9 +107,12 @@ export function RegisterForm({
                 </div>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   required
                   suppressHydrationWarning
+                  value={formData.password}
+                  onChange={handleChange}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -62,8 +120,9 @@ export function RegisterForm({
                   type="submit"
                   className="w-full"
                   suppressHydrationWarning
+                  disabled={isLoading}
                 >
-                  Register
+                  {isLoading ? "Registering..." : "Register"}
                 </Button>
               </div>
             </div>
