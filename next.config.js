@@ -14,9 +14,6 @@ const nextConfig = {
     // Warning rather than error during build
     ignoreBuildErrors: true,
   },
-
-  // Configure SWC minifier
-  swcMinify: true,
 };
 
 module.exports = nextConfig;
