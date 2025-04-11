@@ -1,7 +1,7 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { PasswordManager } from "@/components/password-manager";
+import { EmailDataBreach } from "@/components/email-data-breach";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,13 +36,13 @@ export default function Page() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Password Manager</BreadcrumbPage>
+                  <BreadcrumbPage>Email Data Breach</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <PasswordManager />
+        <EmailDataBreach />
       </SidebarInset>
     </SidebarProvider>
   );

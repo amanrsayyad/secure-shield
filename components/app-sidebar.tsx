@@ -42,15 +42,15 @@ const data = {
         },
         {
           title: "Ip Analysis",
-          url: "#",
+          url: "/tools/ip-analysis",
         },
         {
           title: "Email Data Breach",
-          url: "#",
+          url: "/tools/email-data-breach",
         },
         {
-          title: "Imformative Blogs",
-          url: "#",
+          title: "Malware Scanner",
+          url: "/tools/malware-scanner",
         },
       ],
     },

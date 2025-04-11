@@ -1,7 +1,7 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { PasswordManager } from "@/components/password-manager";
+import { IpAnalysis } from "@/components/ip-analysis";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,13 +36,13 @@ export default function Page() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Password Manager</BreadcrumbPage>
+                  <BreadcrumbPage>IP Analysis</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <PasswordManager />
+        <IpAnalysis />
       </SidebarInset>
     </SidebarProvider>
   );
