@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import CredentialButtons from "./password-manager/CredentialButtons";
 import CredentialForms from "./password-manager/CredentialForms";
-import DataTable from "./password-manager/DataTable";
+import DataTable from "./password-manager/DataTable.fixed";
 import MasterPasswordSetup from "./password-manager/MasterPasswordSetup";
 
 export function PasswordManager() {

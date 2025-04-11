@@ -11,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { encryptData } from "@/lib/encryption";
+import { v4 as uuidv4 } from "uuid";
 
 interface CredentialFormsProps {
   type: "password" | "card" | "wallet" | "note";
@@ -77,40 +79,51 @@ export default function CredentialForms({
     }
 
     try {
-      const response = await fetch("/api/credentials", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type,
-          title,
-          masterPassword,
-          ...dataToSave,
-        }),
-      });
+      // Encrypt the sensitive data
+      const encryptedData = encryptData(
+        JSON.stringify(dataToSave),
+        masterPassword
+      );
 
-      if (response.ok) {
-        setSuccess(true);
-        // Reset form after success
-        setFormData({
-          username: "",
-          password: "",
-          cardNumber1: "",
-          cardNumber2: "",
-          cardNumber3: "",
-          cardNumber4: "",
-          walletAddress: "",
-          walletPassword: "",
-          note: "",
-        });
-        setTitle("");
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Failed to save credential");
+      // Create a new credential object
+      const newCredential = {
+        id: uuidv4(), // Generate a unique ID
+        type,
+        title,
+        encryptedData,
+        lastModified: new Date().toISOString(),
+      };
+
+      // Get existing credentials from localStorage
+      const savedCredentials = localStorage.getItem("credentials");
+      let credentials = [];
+
+      if (savedCredentials) {
+        credentials = JSON.parse(savedCredentials);
       }
+
+      // Add the new credential
+      credentials.push(newCredential);
+
+      // Save back to localStorage
+      localStorage.setItem("credentials", JSON.stringify(credentials));
+
+      setSuccess(true);
+      // Reset form after success
+      setFormData({
+        username: "",
+        password: "",
+        cardNumber1: "",
+        cardNumber2: "",
+        cardNumber3: "",
+        cardNumber4: "",
+        walletAddress: "",
+        walletPassword: "",
+        note: "",
+      });
+      setTitle("");
     } catch (error) {
-      setError("Error connecting to API");
+      setError("Error saving credential");
     } finally {
       setLoading(false);
     }
@@ -125,10 +138,11 @@ export default function CredentialForms({
 
   const handleClose = () => {
     if (success) {
-      // Refresh the data table
-      window.location.reload();
+      // No need to reload the entire page, just close the form
+      onClose();
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   return (

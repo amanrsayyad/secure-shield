@@ -12,9 +12,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface DecodedCredential {
+interface Credential {
   id: string;
-  type: "password" | "card" | "wallet" | "note";
+  type: "password" | "credit/debit" | "crypto" | "note";
   title: string;
   username?: string;
   password?: string;
@@ -25,18 +25,21 @@ interface DecodedCredential {
   walletAddress?: string;
   walletPassword?: string;
   note?: string;
+  lastModified: string;
 }
 
 interface CredentialEditFormProps {
-  credential: DecodedCredential;
+  credential: Credential;
   masterPassword: string;
   onClose: () => void;
+  onUpdate: (updatedCredential: Credential) => void;
 }
 
 export default function CredentialEditForm({
   credential,
   masterPassword,
   onClose,
+  onUpdate,
 }: CredentialEditFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,63 +59,23 @@ export default function CredentialEditForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title.trim()) {
-      setError("Title is required");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
-    // Extract only relevant data for the credential type
-    let dataToSave: any = {};
-
-    if (credential.type === "password") {
-      dataToSave = {
-        username: formData.username,
-        password: formData.password,
-      };
-    } else if (credential.type === "card") {
-      dataToSave = {
-        cardNumber1: formData.cardNumber1,
-        cardNumber2: formData.cardNumber2,
-        cardNumber3: formData.cardNumber3,
-        cardNumber4: formData.cardNumber4,
-      };
-    } else if (credential.type === "wallet") {
-      dataToSave = {
-        walletAddress: formData.walletAddress,
-        walletPassword: formData.walletPassword,
-      };
-    } else if (credential.type === "note") {
-      dataToSave = {
-        note: formData.note,
-      };
-    }
-
     try {
-      const response = await fetch(`/api/credentials/${credential.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: credential.type,
-          title,
-          masterPassword,
-          ...dataToSave,
-        }),
-      });
+      // Create updated credential object
+      const updatedCredential: Credential = {
+        ...credential,
+        title,
+        ...formData,
+        lastModified: new Date().toISOString(),
+      };
 
-      if (response.ok) {
-        setSuccess(true);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Failed to update credential");
-      }
+      // Call the parent component's update function
+      onUpdate(updatedCredential);
+      setSuccess(true);
     } catch (error) {
-      setError("Error connecting to API");
+      setError("Error updating credential");
     } finally {
       setLoading(false);
     }

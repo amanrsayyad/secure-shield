@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encrypt, decrypt } from "@/lib/encryption";
-
-// This is accessing the same in-memory store from the main route
-// In production, you would use a database
-let credentials: any[] = [];
-try {
-  // Import from parent route (hacky but works for demo)
-  credentials = require("../route").credentials;
-} catch (error) {
-  console.error("Could not import credentials array");
-}
+import dbConnect from "@/lib/dbConnect";
+import { Credential } from "@/lib/models/credential";
 
 // GET: Retrieve a credential by ID
 export async function GET(
@@ -17,6 +9,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // For demonstration, we'll use a hardcoded user ID
+    // In a real app, you would get the user ID from your authentication system
+    const userId = "demo-user";
     const { id } = params;
     const searchParams = new URL(req.url).searchParams;
     const masterPassword = searchParams.get("masterPassword");
@@ -28,7 +23,8 @@ export async function GET(
       );
     }
 
-    const credential = credentials.find((cred) => cred.id === id);
+    await dbConnect();
+    const credential = await Credential.findOne({ _id: id, userId });
 
     if (!credential) {
       return NextResponse.json(
@@ -43,8 +39,11 @@ export async function GET(
         decrypt(credential.encryptedData, masterPassword)
       );
 
+      // Convert Mongoose document to plain object
+      const credentialObj = credential.toObject();
+
       return NextResponse.json({
-        ...credential,
+        ...credentialObj,
         ...decryptedData,
         encryptedData: undefined,
       });
@@ -55,6 +54,7 @@ export async function GET(
       );
     }
   } catch (error) {
+    console.error("Error retrieving credential:", error);
     return NextResponse.json(
       { error: "Failed to retrieve credential" },
       { status: 500 }
@@ -62,12 +62,15 @@ export async function GET(
   }
 }
 
-// PUT: Update a credential
-export async function PUT(
+// PATCH/PUT: Update a credential
+export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // For demonstration, we'll use a hardcoded user ID
+    // In a real app, you would get the user ID from your authentication system
+    const userId = "demo-user";
     const { id } = params;
     const body = await req.json();
     const { type, title, masterPassword, ...data } = body;
@@ -79,9 +82,10 @@ export async function PUT(
       );
     }
 
-    const index = credentials.findIndex((cred) => cred.id === id);
+    await dbConnect();
+    const credential = await Credential.findOne({ _id: id, userId });
 
-    if (index === -1) {
+    if (!credential) {
       return NextResponse.json(
         { error: "Credential not found" },
         { status: 404 }
@@ -91,16 +95,16 @@ export async function PUT(
     // Encrypt the updated data
     const encryptedData = encrypt(JSON.stringify(data), masterPassword);
 
-    credentials[index] = {
-      ...credentials[index],
-      type,
-      title,
-      encryptedData,
-      lastModified: new Date().toISOString().split("T")[0],
-    };
+    // Update the credential
+    credential.type = type;
+    credential.title = title;
+    credential.encryptedData = encryptedData;
+    credential.lastModified = new Date();
 
-    return NextResponse.json(credentials[index]);
+    await credential.save();
+    return NextResponse.json(credential);
   } catch (error) {
+    console.error("Error updating credential:", error);
     return NextResponse.json(
       { error: "Failed to update credential" },
       { status: 500 }
@@ -114,22 +118,30 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // For demonstration, we'll use a hardcoded user ID
+    // In a real app, you would get the user ID from your authentication system
+    const userId = "demo-user";
     const { id } = params;
-    const index = credentials.findIndex((cred) => cred.id === id);
 
-    if (index === -1) {
+    await dbConnect();
+    const result = await Credential.deleteOne({ _id: id, userId });
+
+    if (result.deletedCount === 0) {
       return NextResponse.json(
         { error: "Credential not found" },
         { status: 404 }
       );
     }
 
-    credentials.splice(index, 1);
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Error deleting credential:", error);
     return NextResponse.json(
       { error: "Failed to delete credential" },
       { status: 500 }
     );
   }
 }
+
+// Support for PUT method
+export { PATCH as PUT };

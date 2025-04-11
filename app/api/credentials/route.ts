@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { encrypt, decrypt } from "@/lib/encryption";
+import { encrypt } from "@/lib/encryption";
+import dbConnect from "@/lib/dbConnect";
+import { Credential } from "@/lib/models/credential";
 
-// Temporary storage for demo - in production, this would be a database
-export let credentials: any[] = [];
-
-// GET: Retrieve all credentials (encrypted)
+// GET: Retrieve all credentials for the current user
 export async function GET(req: NextRequest) {
   try {
+    // For demonstration, we'll use a hardcoded user ID
+    // In a real app, you would get the user ID from your authentication system
+    const userId = "demo-user";
+
+    await dbConnect();
+    const credentials = await Credential.find({ userId }).sort({
+      lastModified: -1,
+    });
+
     return NextResponse.json(credentials);
   } catch (error) {
+    console.error("Error fetching credentials:", error);
     return NextResponse.json(
       { error: "Failed to retrieve credentials" },
       { status: 500 }
@@ -19,6 +28,10 @@ export async function GET(req: NextRequest) {
 // POST: Create a new credential
 export async function POST(req: NextRequest) {
   try {
+    // For demonstration, we'll use a hardcoded user ID
+    // In a real app, you would get the user ID from your authentication system
+    const userId = "demo-user";
+
     const body = await req.json();
     const { type, title, masterPassword, ...data } = body;
 
@@ -32,17 +45,19 @@ export async function POST(req: NextRequest) {
     // Encrypt the sensitive data
     const encryptedData = encrypt(JSON.stringify(data), masterPassword);
 
-    const newCredential = {
-      id: Date.now().toString(),
+    await dbConnect();
+    const newCredential = new Credential({
+      userId,
       type,
       title,
       encryptedData,
-      lastModified: new Date().toISOString().split("T")[0],
-    };
+      lastModified: new Date(),
+    });
 
-    credentials.push(newCredential);
+    await newCredential.save();
     return NextResponse.json(newCredential);
   } catch (error) {
+    console.error("Error creating credential:", error);
     return NextResponse.json(
       { error: "Failed to create credential" },
       { status: 500 }

@@ -30,3 +30,7 @@ export function decrypt(encryptedData: string, password: string): string {
     throw new Error("Failed to decrypt data");
   }
 }
+
+// Aliases for consistent naming in the DataTable component
+export const encryptData = encrypt;
+export const decryptData = decrypt;
